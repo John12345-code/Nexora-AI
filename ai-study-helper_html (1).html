@@ -1,0 +1,1179 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head><base href="https://d16ilfvy4mv02r.cloudfront.net/workspaces/sx0UQzv90WqTg3AjCoYA5rQqJcteeQlY/7d654e39-984c-4e18-98da-97292a990560/files/">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Study Helper</title>
+<style>
+:root{
+  --primary:#6366f1; --primary-dark:#4f46e5; --secondary:#10b981;
+  --bg:#f8fafc; --card:#ffffff; --text:#1e293b; --muted:#64748b;
+  --border:#e2e8f0; --danger:#ef4444; --warn:#f59e0b;
+  --radius:14px;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:var(--bg); color:var(--text); min-height:100vh;}
+.hidden{display:none !important;}
+
+/* ===== AUTH SCREENS ===== */
+#authScreen{min-height:100vh; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,#6366f1 0%,#8b5cf6 50%,#ec4899 100%); padding:20px;}
+.auth-box{background:var(--card); border-radius:20px; padding:40px; width:100%; max-width:420px; box-shadow:0 20px 60px rgba(0,0,0,0.25);}
+.auth-logo{text-align:center; margin-bottom:24px;}
+.auth-logo .emoji{font-size:48px;}
+.auth-logo h1{font-size:24px; margin-top:8px; background:linear-gradient(135deg,var(--primary),#ec4899); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;}
+.auth-tabs{display:flex; background:var(--bg); border-radius:10px; padding:4px; margin-bottom:24px;}
+.auth-tab{flex:1; text-align:center; padding:10px; border-radius:8px; cursor:pointer; font-weight:600; color:var(--muted); transition:all .2s;}
+.auth-tab.active{background:var(--card); color:var(--primary); box-shadow:0 2px 6px rgba(0,0,0,0.08);}
+.form-group{margin-bottom:16px;}
+.form-group label{display:block; font-size:13px; font-weight:600; margin-bottom:6px; color:var(--muted);}
+.form-group input, .form-group select{width:100%; padding:12px 14px; border:1.5px solid var(--border); border-radius:10px; font-size:14px; transition:border .2s; background:var(--card); color: var(--text);}
+.form-group input:focus, .form-group select:focus{outline:none; border-color:var(--primary);}
+.btn{display:inline-block; width:100%; padding:13px; border:none; border-radius:10px; background:linear-gradient(135deg,var(--primary),#8b5cf6); color:#fff; font-weight:700; font-size:15px; cursor:pointer; transition:transform .15s, box-shadow .15s;}
+.btn:hover{transform:translateY(-1px); box-shadow:0 8px 20px rgba(99,102,241,0.35);}
+.btn-secondary{background:var(--bg); color:var(--text); border:1.5px solid var(--border);}
+.btn-secondary:hover{box-shadow:none; background:#eef2ff;}
+.btn-sm{width:auto; padding:8px 16px; font-size:13px;}
+.auth-error{background:#fef2f2; color:var(--danger); padding:10px 14px; border-radius:8px; font-size:13px; margin-bottom:14px; display:none;}
+.auth-footer{text-align:center; margin-top:18px; font-size:13px; color:var(--muted);}
+.auth-footer a{color:var(--primary); cursor:pointer; font-weight:600; text-decoration:none;}
+.demo-note{margin-top:20px; padding:12px; background:#fffbeb; border-radius:10px; font-size:12px; color:#92400e; text-align:center;}
+
+/* ===== APP LAYOUT ===== */
+#appScreen{display:flex; min-height:100vh;}
+.sidebar{width:260px; background:#111827; color:#fff; padding:20px 16px; flex-shrink:0; display:flex; flex-direction:column;}
+.sidebar-logo{font-size:20px; font-weight:800; padding:10px 8px 20px; display:flex; align-items:center; gap:8px;}
+.nav-item{display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:10px; cursor:pointer; color:#cbd5e1; font-size:14px; font-weight:500; margin-bottom:4px; transition:all .15s;}
+.nav-item:hover{background:#1f2937; color:#fff;}
+.nav-item.active{background:linear-gradient(135deg,var(--primary),#8b5cf6); color:#fff;}
+.nav-item .icon{font-size:18px;}
+.sidebar-user{margin-top:auto; padding:14px; background:#1f2937; border-radius:12px; display:flex; align-items:center; gap:10px;}
+.avatar{width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,var(--primary),#ec4899); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; flex-shrink:0;}
+.sidebar-user-info{flex:1; min-width:0;}
+.sidebar-user-info .name{font-size:13px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.sidebar-user-info .plan{font-size:11px; color:#9ca3af;}
+.logout-btn{background:none; border:none; color:#9ca3af; cursor:pointer; font-size:16px;}
+
+.main-content{flex:1; padding:28px 36px; overflow-y:auto; max-height:100vh;}
+.page-header{display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:12px;}
+.page-header h2{font-size:26px;}
+.page-header p{color:var(--muted); font-size:14px; margin-top:4px;}
+.badge{display:inline-block; padding:4px 12px; border-radius:20px; font-size:12px; font-weight:700;}
+.badge-free{background:#e0e7ff; color:var(--primary);}
+.badge-premium{background:linear-gradient(135deg,#fbbf24,#f59e0b); color:#78350f;}
+
+.grid{display:grid; gap:18px;}
+.grid-4{grid-template-columns:repeat(4,1fr);}
+.grid-3{grid-template-columns:repeat(3,1fr);}
+.grid-2{grid-template-columns:repeat(2,1fr);}
+@media(max-width:1100px){.grid-4{grid-template-columns:repeat(2,1fr);} .grid-3{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:700px){.grid-4,.grid-3,.grid-2{grid-template-columns:1fr;} .sidebar{width:80px;} .nav-item span.label{display:none;} .sidebar-logo span.label{display:none;} .sidebar-user{display:none;}}
+
+.card{background:var(--card); border-radius:var(--radius); padding:22px; border:1px solid var(--border); box-shadow:0 1px 3px rgba(0,0,0,0.04);}
+.card:hover{box-shadow:0 4px 16px rgba(0,0,0,0.06);}
+.stat-card .stat-icon{font-size:26px; margin-bottom:8px;}
+.stat-card .stat-value{font-size:28px; font-weight:800;}
+.stat-card .stat-label{font-size:13px; color:var(--muted); margin-top:2px;}
+.stat-card .stat-delta{font-size:12px; color:var(--secondary); font-weight:600; margin-top:6px;}
+
+.feature-card{cursor:pointer; transition:transform .15s;}
+.feature-card:hover{transform:translateY(-3px);}
+.feature-card .fi{width:48px; height:48px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px; margin-bottom:12px;}
+.feature-card h3{font-size:16px; margin-bottom:6px;}
+.feature-card p{font-size:13px; color:var(--muted); line-height:1.5;}
+
+.progress-bar{height:8px; background:var(--border); border-radius:20px; overflow:hidden; margin-top:6px;}
+.progress-fill{height:100%; background:linear-gradient(90deg,var(--primary),#8b5cf6); border-radius:20px; transition:width .4s;}
+
+/* Chat / Tutor */
+.chat-window{background:var(--card); border-radius:var(--radius); border:1px solid var(--border); height:480px; display:flex; flex-direction:column;}
+.chat-messages{flex:1; overflow-y:auto; padding:20px; display:flex; flex-direction:column; gap:14px;}
+.msg{max-width:75%; padding:12px 16px; border-radius:14px; font-size:14px; line-height:1.5;}
+.msg.user{align-self:flex-end; background:var(--primary); color:#fff; border-bottom-right-radius:4px;}
+.msg.ai{align-self:flex-start; background:#f1f5f9; color:var(--text); border-bottom-left-radius:4px; white-space:pre-wrap;}
+.chat-input-row{display:flex; gap:10px; padding:16px; border-top:1px solid var(--border);}
+.chat-input-row input{flex:1; padding:12px 16px; border:1.5px solid var(--border); border-radius:24px; font-size:14px;}
+.chat-input-row input:focus{outline:none; border-color:var(--primary);}
+.send-btn{width:44px; height:44px; border-radius:50%; background:var(--primary); color:#fff; border:none; cursor:pointer; font-size:16px;}
+.subject-pills{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;}
+.pill{padding:7px 14px; border-radius:20px; background:var(--bg); border:1.5px solid var(--border); font-size:13px; cursor:pointer; font-weight:600; color:var(--muted);}
+.pill.active{background:var(--primary); color:#fff; border-color:var(--primary);}
+
+/* Flashcards */
+.flashcard-scene{perspective:1200px; height:220px; margin-bottom:20px;}
+.flashcard{width:100%; height:100%; position:relative; transform-style:preserve-3d; transition:transform .5s; cursor:pointer;}
+.flashcard.flipped{transform:rotateY(180deg);}
+.fc-face{position:absolute; width:100%; height:100%; backface-visibility:hidden; border-radius:16px; display:flex; align-items:center; justify-content:center; text-align:center; padding:30px; font-size:18px; font-weight:600;}
+.fc-front{background:linear-gradient(135deg,var(--primary),#8b5cf6); color:#fff;}
+.fc-back{background:linear-gradient(135deg,#10b981,#059669); color:#fff; transform:rotateY(180deg);}
+.fc-controls{display:flex; justify-content:center; gap:12px; margin-bottom:16px;}
+.fc-nav-btn{padding:10px 18px; border-radius:10px; border:1.5px solid var(--border); background:var(--card); cursor:pointer; font-weight:600;}
+.fc-counter{text-align:center; color:var(--muted); font-size:13px; margin-bottom:16px;}
+
+/* Quiz */
+.quiz-option{display:block; width:100%; text-align:left; padding:14px 16px; margin-bottom:10px; border:1.5px solid var(--border); border-radius:12px; background:var(--card); cursor:pointer; font-size:14px; transition:all .15s;}
+.quiz-option:hover{border-color:var(--primary); background:#f5f6ff;}
+.quiz-option.correct{border-color:var(--secondary); background:#ecfdf5; font-weight:600;}
+.quiz-option.wrong{border-color:var(--danger); background:#fef2f2; font-weight:600;}
+.quiz-option:disabled{cursor:default;}
+
+/* Upload zone */
+.upload-zone{border:2px dashed var(--border); border-radius:16px; padding:40px; text-align:center; cursor:pointer; transition:all .2s;}
+.upload-zone:hover{border-color:var(--primary); background:#f5f6ff;}
+.upload-zone .upload-icon{font-size:40px; margin-bottom:12px;}
+
+textarea{width:100%; padding:14px; border:1.5px solid var(--border); border-radius:12px; font-size:14px; font-family:inherit; resize:vertical; min-height:110px;}
+textarea:focus{outline:none; border-color:var(--primary);}
+select.input-select{padding:10px 14px; border:1.5px solid var(--border); border-radius:10px; font-size:13px;}
+
+.result-box{background:#f8fafc; border-left:4px solid var(--primary); border-radius:0 12px 12px 0; padding:18px; margin-top:16px; white-space:pre-wrap; font-size:14px; line-height:1.7;}
+
+.premium-lock{position:relative;}
+.premium-overlay{position:absolute; inset:0; background:rgba(255,255,255,0.9); backdrop-filter:blur(2px); display:flex; flex-direction:column; align-items:center; justify-content:center; border-radius:var(--radius); gap:10px; z-index:5;}
+
+.paywall-modal-bg{position:fixed; inset:0; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:100; overflow-y:auto; padding:20px;}
+.paywall-modal{background:#fff; border-radius:20px; padding:36px; max-width:440px; text-align:center; margin:auto;}
+.paywall-modal .emoji{font-size:44px; margin-bottom:12px;}
+.price-tag{font-size:32px; font-weight:800; margin:14px 0 4px; color:var(--primary);}
+.plan-features{text-align:left; margin:16px 0; font-size:14px;}
+.plan-features li{list-style:none; padding:6px 0; display:flex; gap:8px; align-items:center;}
+
+/* Payment modal */
+.pay-modal{background:#fff; border-radius:20px; padding:32px; max-width:440px; width:100%; margin:auto; text-align:left;}
+.pay-plan-options{display:flex; gap:10px; margin:16px 0;}
+.pay-plan-opt{flex:1; border:2px solid var(--border); border-radius:12px; padding:14px; text-align:center; cursor:pointer; position:relative; transition:all .15s;}
+.pay-plan-opt.selected{border-color:var(--primary); background:#f5f6ff;}
+.pay-plan-opt .save-badge{position:absolute; top:-10px; right:8px; background:var(--secondary); color:#fff; font-size:10px; padding:2px 8px; border-radius:10px; font-weight:700;}
+.pay-plan-opt .pp-name{font-size:13px; font-weight:700; color:var(--muted);}
+.pay-plan-opt .pp-price{font-size:20px; font-weight:800; margin:4px 0;}
+.pay-plan-opt .pp-sub{font-size:11px; color:var(--muted);}
+.card-row{display:flex; gap:10px;}
+.card-row .form-group{flex:1;}
+.card-brand-icons{display:flex; gap:6px; font-size:20px;}
+.pay-secure-note{display:flex; align-items:center; gap:6px; font-size:12px; color:var(--muted); margin:14px 0; justify-content:center;}
+.card-input-wrap{position:relative;}
+.card-input-wrap .cc-icon{position:absolute; right:12px; top:50%; transform:translateY(-50%); font-size:16px;}
+.pay-success{text-align:center; padding:20px 0;}
+.pay-success .big-check{font-size:56px; margin-bottom:10px;}
+
+.toast{position:fixed; bottom:24px; right:24px; background:#111827; color:#fff; padding:14px 20px; border-radius:12px; font-size:14px; z-index:200; box-shadow:0 8px 24px rgba(0,0,0,0.3); animation:slideIn .3s ease;}
+@keyframes slideIn{from{transform:translateX(100px); opacity:0;} to{transform:translateX(0); opacity:1;}}
+
+.streak-cal{display:flex; gap:6px; flex-wrap:wrap;}
+.streak-day{width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:600; background:var(--border); color:var(--muted);}
+.streak-day.done{background:linear-gradient(135deg,var(--primary),#8b5cf6); color:#fff;}
+</style>
+</head>
+<body>
+
+<!-- ================= AUTH SCREEN ================= -->
+<div id="authScreen">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <div class="emoji">📚</div>
+      <h1>AI Study Helper</h1>
+      <p style="color:var(--muted); font-size:13px; margin-top:4px;">Your intelligent learning companion</p>
+    </div>
+
+    <div class="auth-tabs">
+      <div class="auth-tab active" id="tabLogin" onclick="switchAuthTab('login')">Log In</div>
+      <div class="auth-tab" id="tabSignup" onclick="switchAuthTab('signup')">Sign Up</div>
+    </div>
+
+    <div class="auth-error" id="authError"></div>
+
+    <!-- LOGIN FORM -->
+    <form id="loginForm" onsubmit="handleLogin(event)">
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="loginEmail" placeholder="you@example.com" required>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="loginPassword" placeholder="••••••••" required>
+      </div>
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:16px;">
+        <input type="checkbox" id="rememberMe" checked style="width:16px; height:16px; cursor:pointer;">
+        <label for="rememberMe" style="font-size:13px; color:var(--muted); cursor:pointer; margin:0;">Remember me & save my progress on this device</label>
+      </div>
+      <button type="submit" class="btn">Log In</button>
+    </form>
+
+    <!-- SIGNUP FORM -->
+    <form id="signupForm" class="hidden" onsubmit="handleSignup(event)">
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="signupName" placeholder="Jane Doe" required>
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="signupEmail" placeholder="you@example.com" required>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="signupPassword" placeholder="Min. 6 characters" required minlength="6">
+      </div>
+      <div class="form-group">
+        <label>I'm mainly studying</label>
+        <select id="signupGrade">
+          <option>Middle School</option>
+          <option>High School</option>
+          <option selected>College / University</option>
+          <option>Professional / Exam Prep</option>
+        </select>
+      </div>
+      <button type="submit" class="btn">Create Free Account</button>
+    </form>
+
+    <div class="auth-footer" id="authFooter">
+      Don't have an account? <a onclick="switchAuthTab('signup')">Sign up free</a>
+    </div>
+
+    <div class="demo-note">💡 Demo mode: accounts are stored in your browser (localStorage). Use any email/password — try <b>demo@study.ai</b> / <b>demo123</b> for a pre-filled premium account.</div>
+  </div>
+</div>
+
+<!-- ================= APP SCREEN ================= -->
+<div id="appScreen" class="hidden">
+  <div class="sidebar">
+    <div class="sidebar-logo">📚 <span class="label">Study Helper</span></div>
+    <div class="nav-item active" data-page="dashboard" onclick="navigate('dashboard')"><span class="icon">🏠</span><span class="label">Dashboard</span></div>
+    <div class="nav-item" data-page="tutor" onclick="navigate('tutor')"><span class="icon">🤖</span><span class="label">AI Tutor</span></div>
+    <div class="nav-item" data-page="homework" onclick="navigate('homework')"><span class="icon">✍️</span><span class="label">Homework Helper</span></div>
+    <div class="nav-item" data-page="flashcards" onclick="navigate('flashcards')"><span class="icon">🗂️</span><span class="label">Flashcards</span></div>
+    <div class="nav-item" data-page="quiz" onclick="navigate('quiz')"><span class="icon">🧪</span><span class="label">Quiz Generator</span></div>
+    <div class="nav-item" data-page="essay" onclick="navigate('essay')"><span class="icon">📝</span><span class="label">Essay Outline</span></div>
+    <div class="nav-item" data-page="scanner" onclick="navigate('scanner')"><span class="icon">📷</span><span class="label">PDF & Image Scanner</span></div>
+    <div class="nav-item" data-page="notes" onclick="navigate('notes')"><span class="icon">🗒️</span><span class="label">Notes Organizer</span></div>
+    <div class="nav-item" data-page="planner" onclick="navigate('planner')"><span class="icon">🗓️</span><span class="label">Study Planner</span></div>
+    <div class="nav-item" data-page="progress" onclick="navigate('progress')"><span class="icon">📊</span><span class="label">Progress</span></div>
+    <div class="nav-item" data-page="pricing" onclick="navigate('pricing')"><span class="icon">💰</span><span class="label">Upgrade</span></div>
+
+    <div class="sidebar-user">
+      <div class="avatar" id="sbAvatar">JD</div>
+      <div class="sidebar-user-info">
+        <div class="name" id="sbName">Jane Doe</div>
+        <div class="plan" id="sbPlan">Free Plan</div>
+      </div>
+      <button class="logout-btn" onclick="logout()" title="Log out">⏻</button>
+    </div>
+  </div>
+
+  <div class="main-content" id="mainContent">
+    <!-- pages injected here -->
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   DATA LAYER (localStorage-based demo auth + app state)
+========================================================= */
+const USERS_KEY = 'studyhelper_users';
+const SESSION_KEY = 'studyhelper_session';
+const LAST_PAGE_KEY = 'studyhelper_last_page';
+
+function getUsers(){ return JSON.parse(localStorage.getItem(USERS_KEY) || '{}'); }
+function saveUsers(u){ localStorage.setItem(USERS_KEY, JSON.stringify(u)); }
+
+// Session is stored in localStorage (persists across browser restarts, "Remember me")
+// or sessionStorage (cleared when the tab/browser closes) depending on user choice.
+function setSession(email, remember){
+  if(remember){
+    localStorage.setItem(SESSION_KEY, email);
+    sessionStorage.removeItem(SESSION_KEY);
+  } else {
+    sessionStorage.setItem(SESSION_KEY, email);
+    localStorage.removeItem(SESSION_KEY);
+  }
+}
+function getSessionEmail(){
+  return localStorage.getItem(SESSION_KEY) || sessionStorage.getItem(SESSION_KEY);
+}
+function clearSession(){
+  localStorage.removeItem(SESSION_KEY);
+  sessionStorage.removeItem(SESSION_KEY);
+}
+
+function seedDemoUser(){
+  const users = getUsers();
+  if(!users['demo@study.ai']){
+    users['demo@study.ai'] = {
+      name:'Demo Student', email:'demo@study.ai', password:'demo123', grade:'College / University',
+      plan:'premium', streak:14, accuracy:87, hoursStudied:42.5, weeklyGoalPct:70,
+      subjects:{Math:82,Science:74,English:91,History:68,Geography:55,Economics:63,'Computer Science':88,Languages:47},
+      flashcardSets:{}, notes:[], aiQuestionsUsedToday:0, joined:'2026-06-01'
+    };
+    saveUsers(users);
+  }
+}
+seedDemoUser();
+
+function currentUser(){
+  const email = getSessionEmail();
+  if(!email) return null;
+  const users = getUsers();
+  return users[email] || null;
+}
+function updateCurrentUser(patch){
+  const email = getSessionEmail();
+  const users = getUsers();
+  if(!users[email]) return;
+  Object.assign(users[email], patch);
+  saveUsers(users);
+}
+
+/* =========================================================
+   AUTH SCREEN LOGIC
+========================================================= */
+function switchAuthTab(tab){
+  document.getElementById('tabLogin').classList.toggle('active', tab==='login');
+  document.getElementById('tabSignup').classList.toggle('active', tab==='signup');
+  document.getElementById('loginForm').classList.toggle('hidden', tab!=='login');
+  document.getElementById('signupForm').classList.toggle('hidden', tab!=='signup');
+  document.getElementById('authFooter').innerHTML = tab==='login'
+    ? `Don't have an account? <a onclick="switchAuthTab('signup')">Sign up free</a>`
+    : `Already have an account? <a onclick="switchAuthTab('login')">Log in</a>`;
+  document.getElementById('authError').style.display='none';
+}
+
+function showAuthError(msg){
+  const e = document.getElementById('authError');
+  e.textContent = msg; e.style.display='block';
+}
+
+function handleLogin(e){
+  e.preventDefault();
+  const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+  const pw = document.getElementById('loginPassword').value;
+  const remember = document.getElementById('rememberMe').checked;
+  const users = getUsers();
+  if(!users[email]){ showAuthError('No account found with that email. Try signing up!'); return; }
+  if(users[email].password !== pw){ showAuthError('Incorrect password. Please try again.'); return; }
+  setSession(email, remember);
+  enterApp();
+  toast(remember ? '✅ Signed in — your progress will be saved and remembered on this device.' : '✅ Signed in for this session.');
+}
+
+function handleSignup(e){
+  e.preventDefault();
+  const name = document.getElementById('signupName').value.trim();
+  const email = document.getElementById('signupEmail').value.trim().toLowerCase();
+  const pw = document.getElementById('signupPassword').value;
+  const grade = document.getElementById('signupGrade').value;
+  const users = getUsers();
+  if(users[email]){ showAuthError('An account with this email already exists. Please log in.'); return; }
+  users[email] = {
+    name, email, password:pw, grade, plan:'free', streak:0, accuracy:0, hoursStudied:0, weeklyGoalPct:0,
+    subjects:{Math:0,Science:0,English:0,History:0,Geography:0,Economics:0,'Computer Science':0,Languages:0},
+    flashcardSets:{}, notes:[], aiQuestionsUsedToday:0, joined:new Date().toISOString().slice(0,10)
+  };
+  saveUsers(users);
+  setSession(email, true);
+  enterApp();
+  toast('🎉 Account created — you\'re signed in and your progress will be saved automatically.');
+}
+
+function logout(){
+  clearSession();
+  document.getElementById('appScreen').classList.add('hidden');
+  document.getElementById('authScreen').classList.remove('hidden');
+  document.getElementById('loginForm').reset();
+}
+
+function enterApp(){
+  const u = currentUser();
+  if(!u) return;
+  document.getElementById('authScreen').classList.add('hidden');
+  document.getElementById('appScreen').classList.remove('hidden');
+  document.getElementById('sbName').textContent = u.name;
+  document.getElementById('sbAvatar').textContent = u.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+  document.getElementById('sbPlan').textContent = u.plan==='premium' ? '⭐ Premium' : 'Free Plan';
+  const lastPage = localStorage.getItem(LAST_PAGE_KEY) || 'dashboard';
+  navigate(lastPage);
+}
+
+// auto-login if a saved session exists (persistent login across browser restarts)
+window.addEventListener('DOMContentLoaded', ()=>{ if(currentUser()) enterApp(); });
+
+/* =========================================================
+   TOAST
+========================================================= */
+function toast(msg){
+  const t = document.createElement('div');
+  t.className='toast'; t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(), 3000);
+}
+
+/* =========================================================
+   PAYWALL
+========================================================= */
+function checkPremium(featureName){
+  const u = currentUser();
+  if(u.plan === 'premium') return true;
+  showPaywall(featureName);
+  return false;
+}
+function showPaywall(featureName){
+  const bg = document.createElement('div');
+  bg.className='paywall-modal-bg';
+  bg.innerHTML = `
+    <div class="paywall-modal">
+      <div class="emoji">⭐</div>
+      <h2>Upgrade to Premium</h2>
+      <p style="color:var(--muted); margin-top:8px; font-size:14px;">${featureName ? `"${featureName}" requires` : 'This feature requires'} Premium access.</p>
+      <div class="price-tag">$9.99–$14.99<span style="font-size:14px; color:var(--muted);">/mo</span></div>
+      <ul class="plan-features">
+        <li>✅ Unlimited AI tutoring</li>
+        <li>✅ Unlimited study guides</li>
+        <li>✅ Unlimited practice exams</li>
+        <li>✅ PDF & image uploads</li>
+        <li>✅ Progress analytics & cloud sync</li>
+      </ul>
+      <button class="btn" onclick="this.closest('.paywall-modal-bg').remove(); openPaymentModal();">Upgrade Now</button>
+      <button class="btn btn-secondary" style="margin-top:10px;" onclick="this.closest('.paywall-modal-bg').remove();">Maybe Later</button>
+    </div>`;
+  document.body.appendChild(bg);
+}
+
+/* =========================================================
+   PAYMENT FLOW
+========================================================= */
+let selectedBillingPlan = 'monthly';
+function upgradeToPremium(){
+  openPaymentModal();
+}
+function openPaymentModal(){
+  const bg = document.createElement('div');
+  bg.className='paywall-modal-bg';
+  bg.id='paymentModalBg';
+  bg.innerHTML = `
+    <div class="pay-modal">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h2>💳 Upgrade to Premium</h2>
+        <button class="logout-btn" style="color:var(--muted); font-size:20px;" onclick="closePaymentModal()">✕</button>
+      </div>
+      <p style="color:var(--muted); font-size:13px; margin-top:4px;">Choose a billing plan and enter your payment details.</p>
+
+      <div class="pay-plan-options">
+        <div class="pay-plan-opt selected" id="planOptMonthly" onclick="selectBillingPlan('monthly')">
+          <div class="pp-name">Monthly</div>
+          <div class="pp-price">$14.99</div>
+          <div class="pp-sub">billed monthly</div>
+        </div>
+        <div class="pay-plan-opt" id="planOptAnnual" onclick="selectBillingPlan('annual')">
+          <span class="save-badge">SAVE 33%</span>
+          <div class="pp-name">Annual</div>
+          <div class="pp-price">$9.99</div>
+          <div class="pp-sub">/mo, billed $119.88/yr</div>
+        </div>
+      </div>
+
+      <form id="paymentForm" onsubmit="handlePayment(event)">
+        <div class="form-group">
+          <label>Cardholder Name</label>
+          <input type="text" id="payName" placeholder="Jane Doe" required>
+        </div>
+        <div class="form-group">
+          <label>Card Number</label>
+          <div class="card-input-wrap">
+            <input type="text" id="payCardNumber" placeholder="1234 5678 9012 3456" maxlength="19" required oninput="formatCardNumber(this)">
+            <span class="cc-icon">💳</span>
+          </div>
+        </div>
+        <div class="card-row">
+          <div class="form-group">
+            <label>Expiry Date</label>
+            <input type="text" id="payExpiry" placeholder="MM/YY" maxlength="5" required oninput="formatExpiry(this)">
+          </div>
+          <div class="form-group">
+            <label>CVC</label>
+            <input type="text" id="payCvc" placeholder="123" maxlength="4" required inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Billing ZIP / Postal Code</label>
+          <input type="text" id="payZip" placeholder="12345" required>
+        </div>
+        <div class="auth-error" id="payError"></div>
+        <button type="submit" class="btn" id="payBtn">Pay <span id="payAmountLabel">$14.99</span> & Unlock Premium</button>
+        <div class="pay-secure-note">🔒 Payments are simulated in this demo — no real charge is made.</div>
+      </form>
+    </div>`;
+  document.body.appendChild(bg);
+}
+function closePaymentModal(){
+  const bg = document.getElementById('paymentModalBg');
+  if(bg) bg.remove();
+}
+function selectBillingPlan(plan){
+  selectedBillingPlan = plan;
+  document.getElementById('planOptMonthly').classList.toggle('selected', plan==='monthly');
+  document.getElementById('planOptAnnual').classList.toggle('selected', plan==='annual');
+  document.getElementById('payAmountLabel').textContent = plan==='monthly' ? '$14.99' : '$119.88';
+}
+function formatCardNumber(el){
+  let v = el.value.replace(/[^0-9]/g,'').slice(0,16);
+  el.value = v.replace(/(.{4})/g,'$1 ').trim();
+}
+function formatExpiry(el){
+  let v = el.value.replace(/[^0-9]/g,'').slice(0,4);
+  if(v.length>=3) v = v.slice(0,2)+'/'+v.slice(2);
+  el.value = v;
+}
+function handlePayment(e){
+  e.preventDefault();
+  const errEl = document.getElementById('payError');
+  errEl.style.display='none';
+  const cardNum = document.getElementById('payCardNumber').value.replace(/\s/g,'');
+  const expiry = document.getElementById('payExpiry').value;
+  const cvc = document.getElementById('payCvc').value;
+
+  if(cardNum.length < 15 || cardNum.length > 16){
+    errEl.textContent = 'Please enter a valid card number.'; errEl.style.display='block'; return;
+  }
+  const expMatch = /^(0[1-9]|1[0-2])\/([0-9]{2})$/.exec(expiry);
+  if(!expMatch){
+    errEl.textContent = 'Please enter a valid expiry date (MM/YY).'; errEl.style.display='block'; return;
+  }
+  if(cvc.length < 3){
+    errEl.textContent = 'Please enter a valid CVC.'; errEl.style.display='block'; return;
+  }
+
+  const btn = document.getElementById('payBtn');
+  btn.disabled = true;
+  btn.textContent = 'Processing payment...';
+
+  setTimeout(()=>{
+    const modal = document.querySelector('#paymentModalBg .pay-modal');
+    const amount = selectedBillingPlan==='monthly' ? '$14.99' : '$119.88';
+    modal.innerHTML = `
+      <div class="pay-success">
+        <div class="big-check">✅</div>
+        <h2>Payment Successful!</h2>
+        <p style="color:var(--muted); margin-top:8px;">You were charged ${amount} for ${selectedBillingPlan==='monthly'?'the Monthly':'the Annual'} Premium plan.</p>
+        <button class="btn" style="margin-top:20px;" onclick="finalizePremiumUpgrade()">Continue to Study Helper</button>
+      </div>`;
+  }, 1400);
+}
+function finalizePremiumUpgrade(){
+  updateCurrentUser({plan:'premium', billing:selectedBillingPlan});
+  document.getElementById('sbPlan').textContent = '⭐ Premium';
+  closePaymentModal();
+  toast('🎉 Welcome to Premium! All features unlocked.');
+  navigate(currentPage);
+}
+
+/* =========================================================
+   NAVIGATION / ROUTER
+========================================================= */
+let currentPage = 'dashboard';
+function navigate(page){
+  currentPage = page;
+  localStorage.setItem(LAST_PAGE_KEY, page);
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active', n.dataset.page===page));
+  const renderers = {
+    dashboard: renderDashboard, tutor: renderTutor, homework: renderHomework,
+    flashcards: renderFlashcards, quiz: renderQuiz, essay: renderEssay,
+    scanner: renderScanner, notes: renderNotes, planner: renderPlanner,
+    progress: renderProgress, pricing: renderPricing
+  };
+  document.getElementById('mainContent').innerHTML = '';
+  (renderers[page] || renderDashboard)();
+  document.getElementById('mainContent').scrollTop = 0;
+}
+
+/* =========================================================
+   PAGE: DASHBOARD
+========================================================= */
+function renderDashboard(){
+  const u = currentUser();
+  const subjEntries = Object.entries(u.subjects);
+  const mc = document.getElementById('mainContent');
+  mc.innerHTML = `
+    <div class="page-header">
+      <div><h2>Welcome back, ${u.name.split(' ')[0]} 👋</h2><p>Here's your learning snapshot for today.</p></div>
+      <span class="badge ${u.plan==='premium'?'badge-premium':'badge-free'}">${u.plan==='premium'?'⭐ Premium':'Free Plan'}</span>
+    </div>
+
+    <div class="grid grid-4" style="margin-bottom:22px;">
+      <div class="card stat-card"><div class="stat-icon">🔥</div><div class="stat-value">${u.streak} days</div><div class="stat-label">Study Streak</div></div>
+      <div class="card stat-card"><div class="stat-icon">✅</div><div class="stat-value">${u.accuracy}%</div><div class="stat-label">Accuracy Rate</div></div>
+      <div class="card stat-card"><div class="stat-icon">⏱️</div><div class="stat-value">${u.hoursStudied}h</div><div class="stat-label">Hours Studied</div></div>
+      <div class="card stat-card"><div class="stat-icon">🎯</div><div class="stat-value">${u.weeklyGoalPct}%</div><div class="stat-label">Weekly Goal</div><div class="progress-bar"><div class="progress-fill" style="width:${u.weeklyGoalPct}%"></div></div></div>
+    </div>
+
+    <h3 style="margin-bottom:14px;">Quick Access</h3>
+    <div class="grid grid-4" style="margin-bottom:26px;">
+      ${featureTile('🤖','#eef2ff','#6366f1','AI Tutor','Ask any question, any subject','tutor')}
+      ${featureTile('✍️','#fdf2f8','#ec4899','Homework Helper','Get help finishing assignments','homework')}
+      ${featureTile('🗂️','#ecfdf5','#10b981','Flashcards','Auto-generated study cards','flashcards')}
+      ${featureTile('🧪','#fff7ed','#f59e0b','Quiz Generator','Practice exams & quizzes','quiz')}
+      ${featureTile('📝','#f5f3ff','#8b5cf6','Essay Outline','Structure your next essay','essay')}
+      ${featureTile('📷','#eff6ff','#3b82f6','PDF & Image Scanner','Turn notes into study material','scanner')}
+      ${featureTile('🗒️','#fefce8','#ca8a04','Notes Organizer','Keep everything tidy','notes')}
+      ${featureTile('🗓️','#fdf4ff','#c026d3','Study Planner','Plan your week smartly','planner')}
+    </div>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h3 style="margin-bottom:14px;">🎯 Subject Mastery</h3>
+        ${subjEntries.map(([s,v])=>`
+          <div style="margin-bottom:12px;">
+            <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:4px;"><span>${s}</span><b>${v}%</b></div>
+            <div class="progress-bar"><div class="progress-fill" style="width:${v}%"></div></div>
+          </div>`).join('')}
+      </div>
+      <div class="card">
+        <h3 style="margin-bottom:14px;">🔥 This Week's Streak</h3>
+        <div class="streak-cal">
+          ${['M','T','W','T','F','S','S'].map((d,i)=>`<div class="streak-day ${i < (u.streak%7===0?7:u.streak%7) ?'done':''}">${d}</div>`).join('')}
+        </div>
+        <p style="color:var(--muted); font-size:13px; margin-top:14px;">Keep it going! Study today to extend your streak to <b>${u.streak+1} days</b>.</p>
+        <h3 style="margin:20px 0 10px;">💰 Plan Status</h3>
+        <p style="font-size:13px; color:var(--muted); margin-bottom:10px;">${u.plan==='premium' ? "You're on Premium — unlimited access to everything." : 'Free plan includes limited AI questions & summaries.'}</p>
+        ${u.plan!=='premium' ? `<button class="btn btn-sm" onclick="navigate('pricing')">Upgrade to Premium</button>` : ''}
+      </div>
+    </div>
+  `;
+}
+function featureTile(icon,bg,color,title,desc,page){
+  return `<div class="card feature-card" onclick="navigate('${page}')">
+    <div class="fi" style="background:${bg}; color:${color};">${icon}</div>
+    <h3>${title}</h3><p>${desc}</p>
+  </div>`;
+}
+
+/* =========================================================
+   PAGE: AI TUTOR
+========================================================= */
+const SUBJECTS = ['Math','Science','English','History','Geography','Economics','Computer Science','Languages'];
+let tutorSubject = 'Math';
+function renderTutor(){
+  const u = currentUser();
+  const mc = document.getElementById('mainContent');
+  mc.innerHTML = `
+    <div class="page-header"><div><h2>🤖 AI Tutor</h2><p>Ask any question in any subject and get step-by-step help.</p></div></div>
+    <div class="subject-pills">${SUBJECTS.map(s=>`<div class="pill ${s===tutorSubject?'active':''}" onclick="setTutorSubject('${s}')">${s}</div>`).join('')}</div>
+    <div class="chat-window">
+      <div class="chat-messages" id="chatMessages">
+        <div class="msg ai">Hi ${u.name.split(' ')[0]}! 👋 I'm your ${tutorSubject} tutor. Ask me anything — a concept, a problem, or "explain like I'm 12".</div>
+      </div>
+      <div class="chat-input-row">
+        <input type="text" id="chatInput" placeholder="Ask your ${tutorSubject} question..." onkeydown="if(event.key==='Enter')sendChat()">
+        <button class="send-btn" onclick="sendChat()">➤</button>
+      </div>
+    </div>
+    <p style="margin-top:10px; color:var(--muted); font-size:12px;">${u.plan==='premium' ? 'Unlimited questions — Premium plan' : `Free plan: ${5-(u.aiQuestionsUsedToday||0)} questions left today`}</p>
+  `;
+}
+function setTutorSubject(s){ tutorSubject = s; renderTutor(); }
+function sendChat(){
+  const u = currentUser();
+  if(u.plan!=='premium' && (u.aiQuestionsUsedToday||0) >= 5){ showPaywall('Unlimited AI Tutoring'); return; }
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if(!text) return;
+  const box = document.getElementById('chatMessages');
+  box.innerHTML += `<div class="msg user">${escapeHtml(text)}</div>`;
+  input.value='';
+  box.scrollTop = box.scrollHeight;
+  updateCurrentUser({aiQuestionsUsedToday: (u.aiQuestionsUsedToday||0)+1});
+  setTimeout(()=>{
+    box.innerHTML += `<div class="msg ai">${generateTutorAnswer(tutorSubject, text)}</div>`;
+    box.scrollTop = box.scrollHeight;
+  }, 500);
+}
+function generateTutorAnswer(subject, q){
+  return `Great ${subject} question! Here's how I'd break down "${q}":
+
+1️⃣ **Identify the concept** — this relates to core ${subject} principles.
+2️⃣ **Step-by-step approach** — work through it systematically, checking each step.
+3️⃣ **Common mistake to avoid** — don't skip verifying your assumptions.
+4️⃣ **Alternative method** — try approaching it from a different angle to double-check.
+
+💡 Want me to generate 3 similar practice questions on this topic, or explain a specific step in more detail?`;
+}
+function escapeHtml(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+
+/* =========================================================
+   PAGE: HOMEWORK HELPER (AI Solver)
+========================================================= */
+function renderHomework(){
+  const mc = document.getElementById('mainContent');
+  mc.innerHTML = `
+    <div class="page-header"><div><h2>✍️ Homework Helper (AI Solver)</h2><p>Paste a problem, upload a worksheet, or take a photo — get full step-by-step solutions.</p></div></div>
+    <div class="grid grid-2">
+      <div class="card">
+        <h3 style="margin-bottom:12px;">📷 Upload / Snap a Problem</h3>
+        <div class="upload-zone" onclick="simulateUpload()">
+          <div class="upload-icon">📤</div>
+          <p><b>Click to upload</b> a photo or worksheet</p>
+          <p style="font-size:12px; color:var(--muted); margin-top:4px;">Supports JPG, PNG, PDF</p>
+        </div>
+        <button class="btn btn-secondary" style="margin-top:12px;" onclick="toast('🎤 Voice input started — speak your question now (demo)')">🎤 Ask by Voice</button>
+      </div>
+      <div class="card">
+        <h3 style="margin-bottom:12px;">⌨️ Or Paste Your Problem</h3>
+        <textarea id="hwInput" placeholder="e.g. Solve for x: 2x + 5 = 17"></textarea>
+        <select class="input-select" id="hwSubject" style="margin-top:10px;">${SUBJECTS.map(s=>`<option>${s}</option>`).join('')}</select>
+        <button class="btn" style="margin-top:12px;" onclick="solveHomework()">Solve & Explain</button>
+      </div>
+    </div>
+    <div id="hwResult"></div>
+  `;
+}
+function simulateUpload(){
+  if(!checkPremium('PDF & Image Uploads')) return;
+  toast('📸 Image received — analyzing problem...');
+  setTimeout(()=>{
+    document.getElementById('hwInput') && (document.getElementById('hwInput').value = 'Solve for x: 3x - 7 = 14');
+    solveHomework();
+  }, 800);
+}
+function solveHomework(){
+  const text = (document.getElementById('hwInput').value || 'Solve for x: 2x + 5 = 17').trim();
+  const subject = document.getElementById('hwSubject').value;
+  document.getElementById('mainContent').querySelector('#hwResult').innerHTML = `
+    <div class="card" style="margin-top:20px;">
+      <h3>📖 Solution — ${subject}</h3>
+      <div class="result-box">
+Problem: ${text}
+
+Step 1: Identify what's being asked and isolate the unknown.
+Step 2: Apply inverse operations in order (undo addition/subtraction, then multiplication/division).
+Step 3: Simplify both sides carefully.
+Step 4: Verify your answer by substituting it back into the original problem.
+
+✅ Final Answer: (worked example — verify with your specific numbers)
+
+🔄 Alternative method: You could also solve this graphically or using a different algebraic property.
+      </div>
+      <div style="display:flex; gap:10px; margin-top:14px;">
+        <button class="btn btn-sm" onclick="toast('📚 Generating 3 similar practice questions...')">Generate Similar Questions</button>
+        <button class="btn btn-sm btn-secondary" onclick="toast('🔍 Showing deeper step breakdown...')">Explain Further</button>
+      </div>
+    </div>`;
+}
+
+/* =========================================================
+   PAGE: FLASHCARDS
+========================================================= */
+const DEMO_FLASHCARDS = {
+  Math:[{q:'What is the Pythagorean theorem?',a:'a² + b² = c² — relates the sides of a right triangle'},{q:'Derivative of x²?',a:'2x'},{q:'What is a prime number?',a:'A number greater than 1 with no divisors other than 1 and itself'}],
+  Science:[{q:'What is photosynthesis?',a:'Process plants use to convert light energy into chemical energy'},{q:"Newton's First Law?",a:'An object stays at rest or in motion unless acted on by a force'},{q:'What is an atom made of?',a:'Protons, neutrons, and electrons'}],
+  History:[{q:'When did WWII end?',a:'1945'},{q:'Who was the first US President?',a:'George Washington'},{q:'What caused the French Revolution?',a:'Social inequality, financial crisis, and Enlightenment ideas'}],
+  'Computer Science':[{q:'What is Big O notation?',a:'A way to describe algorithm time/space complexity'},{q:'What is a variable?',a:'A named storage location for a value'},{q:'What does HTML stand for?',a:'HyperText Markup Language'}]
+};
+let fcSubject='Math', fcIndex=0, fcFlipped=false;
+function renderFlashcards(){
+  const cards = DEMO_FLASHCARDS[fcSubject];
+  const mc = document.getElementById('mainContent');
+  mc.innerHTML = `
+    <div class="page-header"><div><h2>🗂️ Flashcards</h2><p>Auto-generated from your notes and subjects. Click a card to flip it.</p></div></div>
+    <div class="subject-pills">${Object.keys(DEMO_FLASHCARDS).map(s=>`<div class="pill ${s===fcSubject?'active':''}" onclick="setFcSubject('${s}')">${s}</div>`).join('')}</div>
+
+    <div class="grid grid-2">
+      <div>
+        <div class="flashcard-scene">
+          <div class="flashcard ${fcFlipped?'flipped':''}" id="flashcardEl" onclick="flipCard()">
+            <div class="fc-face fc-front">${cards[fcIndex].q}</div>
+            <div class="fc-face fc-back">${cards[fcIndex].a}</div>
+          </div>
+        </div>
+        <div class="fc-counter">Card ${fcIndex+1} of ${cards.length}</div>
+        <div class="fc-controls">
+          <button class="fc-nav-btn" onclick="prevCard()">← Previous</button>
+          <button class="fc-nav-btn" onclick="flipCard()">🔄 Flip</button>
+          <button class="fc-nav-btn" onclick="nextCard()">Next →</button>
+        </div>
+      </div>
+      <div class="card">
+        <h3 style="margin-bottom:12px;">✨ Generate New Flashcard Set</h3>
+        <textarea id="fcNotes" placeholder="Paste your notes here, and I'll auto-generate flashcards..."></textarea>
+        <button class="btn" style="margin-top:12px;" onclick="generateFlashcards()">Generate Flashcards</button>
+        <p style="margin-top:14px; font-size:13px; color:var(--muted);">Or upload a source:</p>
+        <div style="display:flex; gap:8px; margin-top:8px; flex-wrap:wrap;">
+          <button class="btn btn-sm btn-secondary" onclick="checkPremium('PDF Upload')">📄 PDF</button>
+          <button class="btn btn-sm btn-secondary" onclick="checkPremium('Photo Upload')">📷 Photo</button>
+          <button class="btn btn-sm btn-secondary" onclick="checkPremium('Slides Upload')">📊 Slides</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+function setFcSubject(s){ fcSubject=s; fcIndex=0; fcFlipped=false; renderFlashcards(); }
+function flipCard(){ fcFlipped=!fcFlipped; document.getElementById('flashcardEl').classList.toggle('flipped'); }
+function nextCard(){ const c=DEMO_FLASHCARDS[fcSubject]; fcIndex=(fcIndex+1)%c.length; fcFlipped=false; renderFlashcards(); }
+function prevCard(){ const c=DEMO_FLASHCARDS[fcSubject]; fcIndex=(fcIndex-1+c.length)%c.length; fcFlipped=false; renderFlashcards(); }
+function generateFlashcards(){
+  const notes = document.getElementById('fcNotes').value.trim();
+  if(!notes){ toast('Please paste some notes first!'); return; }
+  toast('✨ Generating flashcards from your notes...');
+  setTimeout(()=>toast('✅ 8 flashcards created and added to your ' + fcSubject + ' deck!'), 1000);
+}
+
+/* =========================================================
+   PAGE: QUIZ GENERATOR
+========================================================= */
+const QUIZ_BANK = {
+  Math:[{q:'What is 7 × 8?',opts:['54','56','58','64'],correct:1},{q:'Solve: x + 5 = 12',opts:['x=5','x=7','x=17','x=6'],correct:1},{q:'What is the area of a circle?',opts:['2πr','πr²','πd','r²'],correct:1}],
+  Science:[{q:'What planet is known as the Red Planet?',opts:['Venus','Jupiter','Mars','Saturn'],correct:2},{q:'What gas do plants absorb?',opts:['Oxygen','CO₂','Nitrogen','Helium'],correct:1},{q:'What is H2O?',opts:['Salt','Water','Hydrogen','Oxygen'],correct:1}],
+  History:[{q:'Who wrote the Declaration of Independence?',opts:['Lincoln','Jefferson','Franklin','Adams'],correct:1},{q:'When did WWII start?',opts:['1935','1939','1941','1945'],correct:1}],
+  'Computer Science':[{q:'What does CPU stand for?',opts:['Central Process Unit','Central Processing Unit','Computer Personal Unit','Core Processing Unit'],correct:1},{q:'What is a loop?',opts:['A data type','A repeating block of code','A variable','An error'],correct:1}]
+};
+let quizState = {subject:'Math', difficulty:'Medium', idx:0, score:0, answered:false, timer:null, timeLeft:30};
+function renderQuiz(){
+  quizState = {subject:'Math', difficulty:'Medium', idx:0, score:0, answered:false, timer:null, timeLeft:30};
+  const mc = document.getElementById('mainContent');
+  mc.innerHTML = `
+    <div class="page-header"><div><h2>🧪 Quiz Generator</h2><p>Practice exams with instant explanations and difficulty levels.</p></div></div>
+    <div class="card" style="margin-bottom:20px;">
+      <div style="display:flex; gap:16px; flex-wrap:wrap; align-items:end;">
+        <div><label style="font-size:13px; font-weight:600; color:var(--muted); display:block; margin-bottom:6px;">Subject</label>
+          <select class="input-select" id="quizSubjectSel">${Object.keys(QUIZ_BANK).map(s=>`<option ${s===quizState.subject?'selected':''}>${s}</option>`).join('')}</select>
+        </div>
+        <div><label style="font-size:13px; font-weight:600; color:var(--muted); display:block; margin-bottom:6px;">Difficulty</label>
+          <select class="input-select" id="quizDiffSel">
+            <option>Easy</option><option selected>Medium</option><option>Hard</option>
+          </select>
+        </div>
+        <button class="btn btn-sm" onclick="startQuiz()">Start Timed Quiz</button>
+      </div>
+    </div>
+    <div id="quizArea"></div>
+  `;
+  startQuiz();
+}
+function startQuiz(){
+  quizState.subject = document.getElementById('quizSubjectSel').value;
+  quizState.difficulty = document.getElementById('quizDiffSel').value;
+  quizState.idx = 0; quizState.score = 0;
+  renderQuizQuestion();
+}
+function renderQuizQuestion(){
+  clearInterval(quizState.timer);
+  const bank = QUIZ_BANK[quizState.subject];
+  const area = document.getElementById('quizArea');
+  if(quizState.idx >= bank.length){
+    area.innerHTML = `<div class="card" style="text-align:center;">
+      <h2 style="font-size:40px;">🎉</h2>
+      <h3>Quiz Complete!</h3>
+      <p style="font-size:28px; font-weight:800; margin:14px 0; color:var(--primary);">${quizState.score} / ${bank.length}</p>
+      <p style="color:var(--muted); margin-bottom:16px;">${quizState.score===bank.length ? 'Perfect score! 🌟' : 'Keep practicing to improve your accuracy!'}</p>
+      <button class="btn btn-sm" onclick="startQuiz()">Retry Quiz</button>
+    </div>`;
+    return;
+  }
+  quizState.answered = false;
+  quizState.timeLeft = quizState.difficulty==='Easy'?45:quizState.difficulty==='Hard'?20:30;
+  const q = bank[quizState.idx];
+  area.innerHTML = `
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; margin-bottom:14px; font-size:13px; color:var(--muted);">
+        <span>Question ${quizState.idx+1} of ${bank.length} · ${quizState.difficulty}</span>
+        <span id="quizTimer">⏱️ ${quizState.timeLeft}s</span>
+      </div>
+      <h3 style="margin-bottom:16px;">${q.q}</h3>
+      ${q.opts.map((o,i)=>`<button class="quiz-option" onclick="answerQuiz(${i})">${o}</button>`).join('')}
+      <div id="quizExplain"></div>
+    </div>`;
+  quizState.timer = setInterval(()=>{
+    quizState.timeLeft--;
+    const el = document.getElementById('quizTimer');
+    if(el) el.textContent = `⏱️ ${quizState.timeLeft}s`;
+    if(quizState.timeLeft<=0){ clearInterval(quizState.timer); if(!quizState.answered) answerQuiz(-1); }
+  },1000);
+}
+function answerQuiz(choice){
+  if(quizState.answered) return;
+  quizState.answered = true;
+  clearInterval(quizState.timer);
+  const bank = QUIZ_BANK[quizState.subject];
+  const q = bank[quizState.idx];
+  const opts = document.querySelectorAll('.quiz-option');
+  opts.forEach((btn,i)=>{
+    btn.disabled = true;
+    if(i===q.correct) btn.classList.add('correct');
+    else if(i===choice) btn.classList.add('wrong');
+  });
+  if(choice===q.correct) quizState.score++;
+  document.getElementById('quizExplain').innerHTML = `<div class="result-box" style="margin-top:14px;">${choice===q.correct? '✅ Correct! ' : choice===-1 ? "⏰ Time's up! " : '❌ Not quite. '}The correct answer is "${q.opts[q.correct]}". ${choice!==q.correct ? 'Review this concept and try a similar question in AI Tutor.' : 'Great job — keep up the momentum!'}</div>
+    <button class="btn btn-sm" style="margin-top:14px;" onclick="nextQuizQuestion()">Next Question →</button>`;
+}
+function nextQuizQuestion(){ quizState.idx++; renderQuizQuestion(); }
+
+/* =========================================================
+   PAGE: ESSAY OUTLINE
+========================================================= */
+function renderEssay(){
+  const mc = document.getElementById('mainContent');
+  mc.innerHTML = `
+    <div class="page-header"><div><h2>📝 Essay Outline Generator</h2><p>Get a structured outline, thesis ideas, and argument framework instantly.</p></div></div>
+    <div class="card">
+      <label style="font-size:13px; font-weight:600; color:var(--muted); display:block; margin-bottom:6px;">Essay Topic</label>
+      <input type="text" id="essayTopic" placeholder="e.g. The impact of social media on teenagers" style="width:100%; padding:12px 14px; border:1.5px solid var(--border); border-radius:10px; margin-bottom:14px;">
+      <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:14px;">
+        <select class="input-select" id="essayType"><option>Argumentative</option><option>Analytical</option><option>Persuasive</option><option>Compare & Contrast</option><option>Narrative</option></select>
+        <select class="input-select" id="essayLength"><option>3 paragraphs</option><option selected>5 paragraphs</option><option>7+ paragraphs</option></select>
+      </div>
+      <button class="btn" onclick="generateEssayOutline()">Generate Outline</button>
+    </div>
+    <div id="essayResult"></div>
+  `;
+}
+function generateEssayOutline(){
+  const topic = document.getElementById('essayTopic').value.trim() || 'Your Topic';
+  const type = document.getElementById('essayType').value;
+  document.getElementById('essayResult').innerHTML = `
+    <div class="card" style="margin-top:20px;">
+      <h3>📋 ${type} Essay Outline: "${topic}"</h3>
+      <div class="result-box">
+I. Introduction
+   • Hook: An engaging opening statement or question
+   • Background/context on ${topic}
+   • Thesis statement: Your main argument or claim
+
+II. Body Paragraph 1 — First Main Point
+   • Topic sentence
+   • Supporting evidence/example
+   • Analysis connecting back to thesis
+
+III. Body Paragraph 2 — Second Main Point
+   • Topic sentence
+   • Supporting evidence/example
+   • Counterargument (if applicable) + rebuttal
+
+IV. Body Paragraph 3 — Third Main Point
+   • Topic sentence
+   • Supporting evidence/example
+   • Analysis
+
+V. Conclusion
+   • Restate thesis in new words
+   • Summarize key points
+   • Closing thought / call to action
+      </div>
+      <button class="btn btn-sm" style="margin-top:14px;" onclick="toast('💡 Generating 3 thesis statement options...')">Suggest Thesis Statements</button>
+    </div>`;
+}
+
+/* =========================================================
+   PAGE: PDF & IMAGE SCANNER / CHEAT SHEETS
+========================================================= */
+const CHEATSHEET_TYPES = ['One-page Summary','Formula Sheet','Vocabulary List','Historical Timeline','Science Concept Summary','Math Rules & Identities','Programming Syntax Reference','Custom Study Guide'];
+function renderScanner(){
+  const mc = document.getElementById('mainContent');
+  mc.innerHTML = `
+    <div class="page-header"><div><h2>📷 PDF & Image Scanner</h2><p>Turn PDFs, photos of notes, or slides into smart cheat sheets.</p></div></div>
+    <div class="grid grid-2">
+      <div class="card">
+        <h3 style="margin-bottom:12px;">📤 Upload Source Material</h3>
+        <div class="upload-zone" onclick="scanUpload()"><div class="upload-icon">📄</div><p><b>Click to upload</b></p><p style="font-size:12px; color:var(--muted); margin-top:4px;">PDF, image, or PowerPoint slides</p></div>
+        <textarea id="scanText" placeholder="...or paste your notes / textbook text here" style="margin-top:14px;"></textarea>
+      </div>
+      <div class="card">
+        <h3 style="margin-bottom:12px;">✨ Choose Cheat Sheet Type</h3>
+        <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px;">
+          ${CHEATSHEET_TYPES.map((t,i)=>`<div class="pill ${i===0?'active':''}" onclick="selectSheetType(this,'${t}')">${t}</div>`).join('')}
+        </div>
+        <button class="btn" onclick="generateCheatsheet()">Generate Cheat Sheet</button>
+      </div>
+    </div>
+    <div id="scanResult"></div>
+  `;
+  window.selectedSheetType = CHEATSHEET_TYPES[0];
+}
+function selectSheetType(el,t){
+  document.querySelectorAll('#mainContent .pill').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  window.selectedSheetType = t;
+}
+function scanUpload(){
+  if(!checkPremium('PDF & Image Scanner')) return;
+  toast('📸 Scanning document with OCR...');
+  setTimeout(()=>toast('✅ Text extracted successfully!'), 1000);
+}
+function generateCheatsheet(){
+  const type = window.selectedSheetType || CHEATSHEET_TYPES[0];
+  document.getElementById('scanResult').innerHTML = `
+    <div class="card" style="margin-top:20px;">
+      <h3>📄 ${type}</h3>
+      <div class="result-box">
+${type} generated from your material:
+
+• Key Concept 1 — concise definition and why it matters
+• Key Concept 2 — core formula/rule with example
+• Key Concept 3 — common exam trap to avoid
+• Key Concept 4 — connects to related topics
+• Quick reference table / diagram summary
+
+📌 This condensed sheet highlights only what's essential — perfect for last-minute review.
+      </div>
+      <div style="display:flex; gap:10px; margin-top:14px;">
+        <button class="btn btn-sm" onclick="toast('📥 Downloading as PDF...')">Download PDF</button>
+        <button class="btn btn-sm btn-secondary" onclick="toast('💾 Saved to Notes Organizer')">Save to Notes</button>
+      </div>
+    </div>`;
+}
+
+/* =========================================================
+   PAGE: NOTES ORGANIZER
+========================================================= */
+function renderNotes(){
+  const u = currentUser();
+  const notes = u.notes && u.notes.length ? u.notes : [
+    {title:'Photosynthesis Overview', subject:'Science', date:'2026-07-10'},
+    {title:'WWII Timeline', subject:'History', date:'2026-07-08'},
+    {title:'Algebra Formulas', subject:'Math', date:'2026-07-05'}
+  ];
+  const mc = document.getElementById('mainContent');
+  mc.innerHTML = `
+    <div class="page-header"><div><h2>🗒️ Notes Organizer</h2><p>All your notes, summaries, and cheat sheets in one place.</p></div>
+      <button class="btn btn-sm" onclick="addNote()">+ New Note</button>
+    </div>
+    <div class="grid grid-3" id="notesGrid">
+      ${notes.map(n=>`
+        <div class="card">
+          <div style="display:flex; justify-content:space-between; align-items:start;">
+            <h3 style="font-size:15px;">${n.title}</h3>
+            <span class="badge badge-free">${n.subject}</span>
+          </div>
+          <p style="font-size:12px; color:var(--muted); margin-top:8px;">Last edited: ${n.date}</p>
+          <div style="display:flex; gap:8px; margin-top:14px;">
+            <button class="btn btn-sm btn-secondary" onclick="toast('Opening note...')">Open</button>
+            <button class="btn btn-sm btn-secondary" onclick="toast('Note archived')">Archive</button>
+          </div>
+        </div>`).join('')}
+    </div>
+  `;
+}
+function addNote(){
+  const title = prompt('Note title:');
+  if(!title) return;
+  const u = currentUser();
+  const notes = u.notes && u.notes.length ? u.notes : [];
+  notes.unshift({title, subject:'General', date:new Date().toISOString().slice(0,10)});
+  updateCurrentUser({notes});
+  renderNotes();
+  toast('📝 Note created!');
+}
+
+/* =========================================================
+   PAGE: STUDY PLANNER
+========================================================= */
+function renderPlanner(){
+  const mc = document.getElementById('mainContent');
+  mc.innerHTML = `
+    <div class="page-header"><div><h2>🗓️ Study Planner</h2><p>Plan your week and let AI recommend an optimal study schedule.</p></div></div>
+    <div class="grid grid-2">
+      <div class="card">
+        <h3 style="margin-bottom:12px;">📅 Set Your Goals</h3>
+        <div class="form-group"><label>Upcoming Exam / Subject</label><input type="text" id="planSubject" placeholder="e.g. Biology Midterm"></div>
+        <div class="form-group"><label>Exam Date</label><input type="date" id="planDate"></div>
+        <div class="form-group"><label>Hours available per week</label><input type="number" id="planHours" value="10" min="1" max="60"></div>
+        <button class="btn" onclick="generatePlan()">Generate AI Study Plan</button>
+      </div>
+      <div class="card">
+        <h3 style="margin-bottom:12px;">📈 This Week's Progress</h3>
+        <div class="progress-bar" style="height:14px; margin-bottom:8px;"><div class="progress-fill" style="width:70%"></div></div>
+        <p style="font-size:13px; color:var(--muted); margin-bottom:16px;">7 of 10 target hours completed</p>
+        <div class="streak-cal">${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map((d,i)=>`<div style="text-align:center; flex:1;"><div style="font-size:11px; color:var(--muted); margin-bottom:4px;">${d}</div><div class="streak-day ${i<5?'done':''}" style="margin:0 auto;">${i<5?'✓':''}</div></div>`).join('')}</div>
+      </div>
+    </div>
+    <div id="planResult"></div>
+  `;
+}
+function generatePlan(){
+  const subject = document.getElementById('planSubject').value.trim() || 'Your Exam';
+  const hours = document.getElementById('planHours').value || 10;
+  document.getElementById('planResult').innerHTML = `
+    <div class="card" style="margin-top:20px;">
+      <h3>🎯 AI-Recommended Plan for "${subject}"</h3>
+      <div class="result-box">
+Weekly Study Allocation (${hours} hrs total):
+
+Mon — Review core concepts (1.5h) + flashcards (30m)
+Tue — Practice problems, medium difficulty (2h)
+Wed — Weak topic deep-dive based on quiz results (1.5h)
+Thu — Timed practice quiz + review mistakes (1.5h)
+Fri — Cheat sheet creation & formula review (1h)
+Sat — Full practice exam simulation (2h)
+Sun — Light review + rest (30m)
+
+💡 Tip: Your weakest subject areas will be automatically prioritized based on quiz performance.
+      </div>
+      <button class="btn btn-sm" style="margin-top:14px;" onclick="toast('📆 Plan synced to your calendar!')">Add to Calendar</button>
+    </div>`;
+}
+
+/* =========================================================
+   PAGE: PROGRESS TRACKING
+========================================================= */
+function renderProgress(){
+  const u = currentUser();
+  const mc = document.getElementById('mainContent');
+  mc.innerHTML = `
+    <div class="page-header"><div><h2>📊 Progress Tracking</h2><p>Your learning analytics across all subjects.</p></div>
+      ${u.plan!=='premium' ? '<span class="badge badge-free">Limited view — Upgrade for full analytics</span>' : ''}
+    </div>
+    <div class="grid grid-4" style="margin-bottom:22px;">
+      <div class="card stat-card"><div class="stat-icon">🔥</div><div class="stat-value">${u.streak}</div><div class="stat-label">Day Streak</div></div>
+      <div class="card stat-card"><div class="stat-icon">✅</div><div class="stat-value">${u.accuracy}%</div><div class="stat-label">Overall Accuracy</div></div>
+      <div class="card stat-card"><div class="stat-icon">⏱️</div><div class="stat-value">${u.hoursStudied}h</div><div class="stat-label">Total Hours</div></div>
+      <div class="card stat-card"><div class="stat-icon">🏆</div><div class="stat-value">${Object.values(u.subjects).filter(v=>v>=80).length}</div><div class="stat-label">Subjects Mastered</div></div>
+    </div>
+    <div class="card ${u.plan!=='premium'?'premium-lock':''}">
+      ${u.plan!=='premium' ? `<div class="premium-overlay"><div style="font-size:32px;">🔒</div><p style="font-weight:700;">Unlock Full Analytics</p><button class="btn btn-sm" onclick="showPaywall('Progress Analytics')">Upgrade to Premium</button></div>` : ''}
+      <h3 style="margin-bottom:16px;">Accuracy by Subject</h3>
+      ${Object.entries(u.subjects).map(([s,v])=>`
+        <div style="margin-bottom:12px;">
+          <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:4px;"><span>${s}</span><b>${v}%</b></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:${v}%"></div></div>
+        </div>`).join('')}
+    </div>
+  `;
+}
+
+/* =========================================================
+   PAGE: PRICING / UPGRADE
+========================================================= */
+function renderPricing(){
+  const u = currentUser();
+  const mc = document.getElementById('mainContent');
+  mc.innerHTML = `
+    <div class="page-header"><div><h2>💰 Plans & Pricing</h2><p>Choose the plan that fits your study needs.</p></div></div>
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>Free</h3>
+        <div class="price-tag" style="color:var(--text);">$0<span style="font-size:14px; color:var(--muted);">/mo</span></div>
+        <ul class="plan-features">
+          <li>✅ Limited AI questions (5/day)</li>
+          <li>✅ Basic flashcards</li>
+          <li>✅ Limited summaries</li>
+          <li>❌ PDF & image uploads</li>
+          <li>❌ Progress analytics</li>
+          <li>❌ Cloud sync</li>
+        </ul>
+        ${u.plan==='free' ? '<span class="badge badge-free">Current Plan</span>' : ''}
+      </div>
+      <div class="card" style="border:2px solid var(--primary);">
+        <h3>⭐ Premium</h3>
+        <div class="price-tag">$9.99–$14.99<span style="font-size:14px; color:var(--muted);">/mo</span></div>
+        <ul class="plan-features">
+          <li>✅ Unlimited AI tutoring</li>
+          <li>✅ Unlimited study guide generation</li>
+          <li>✅ Unlimited practice exams</li>
+          <li>✅ Advanced explanations</li>
+          <li>✅ PDF and image uploads</li>
+          <li>✅ Progress analytics</li>
+          <li>✅ Cloud sync</li>
+        </ul>
+        ${u.plan==='premium' ? '<span class="badge badge-premium">Current Plan</span>' : `<button class="btn" onclick="upgradeToPremium()">Upgrade Now</button>`}
+      </div>
+    </div>
+  `;
+}
+</script>
+</body>
+</html>
